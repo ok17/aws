@@ -1,0 +1,16 @@
+#cloud-boothook
+#!/bin/bash
+
+export AWS_ACCESS_KEY='xxxxxxxxx'
+export AWS_SECRET_KEY='xxxxxxxxx'
+export EC2_HOME='/opt/aws/apitools/ec2'
+export JAVA_HOME='/usr/lib/jvm/jre'
+
+INSTANCE=`/opt/aws/bin/ec2-metadata | grep ^instance-id: | cut -d ' ' -f 2`
+LOCAL_IP=`/opt/aws/bin/ec2-metadata | grep ^local-ipv4: | cut -d ' ' -f 2`
+REGION=`/opt/aws/bin/ec2-metadata | grep ^placement: | cut -d ' ' -f 2 | sed -e 's/.$//g'`
+TAG_NAME=`/opt/aws/bin/ec2-describe-instances --region ${REGION} ${INSTANCE} | grep ^TAG | grep Name | cut -f 5`
+
+hostname ${TAG_NAME}
+echo -e "${LOCAL_IP}\t${TAG_NAME}" >> /etc/hosts
+cp -p /usr/share/zoneinfo/Japan /etc/localtime
